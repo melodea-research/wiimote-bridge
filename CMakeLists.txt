@@ -69,7 +69,7 @@ add_subdirectory(src)
 if(NOT SUBPROJECT)
 	# Example apps
 	if(BUILD_EXAMPLE)
-		add_subdirectory(wiimtebridged)
+		add_subdirectory(wiimotebridged)
 	endif()
 endif()
 
@@ -111,8 +111,8 @@ if(NOT SUBPROJECT)
 		DESTINATION ${DOC_DIR} COMPONENT docs)
 
 	if(INSTALL_EXAMPLES)
-		install(FILES wiimtebridged/wiimtebridged.c
-			DESTINATION ${DOC_DIR}/wiimtebridged COMPONENT examples)
+		install(FILES wiimotebridged/wiimotebridged.c
+			DESTINATION ${DOC_DIR}/wiimotebridged COMPONENT examples)
 	endif()
 
 	set(CPACK_RESOURCE_FILE_LICENSE "${CMAKE_CURRENT_SOURCE_DIR}/LICENSE")

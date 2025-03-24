@@ -4,18 +4,18 @@ cmake_minimum_required(VERSION 3.0)
 include_directories(${CMAKE_SOURCE_DIR}/src)
 
 # Add executable
-add_executable(wiimtebridged 
-	wiimtebridged.c
+add_executable(wiimotebridged 
+	wiimotebridged.c
 	osc.c
 )
 
 # Link libraries
-target_link_libraries(wiimtebridged
+target_link_libraries(wiimotebridged
 	wiiuse
 	m  # For math functions
 )
 
 if(INSTALL_EXAMPLES)
-	install(TARGETS wiimtebridged
+	install(TARGETS wiimotebridged
 		RUNTIME DESTINATION bin COMPONENT examples)
 endif()
