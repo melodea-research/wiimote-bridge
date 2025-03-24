@@ -5,6 +5,7 @@
 #include <netinet/in.h>
 #include <sys/socket.h>
 #include <string.h>
+#include <stdbool.h>
 
 #define OSC_MAX_MESSAGE_SIZE 1024
 #define OSC_MOVING_AVERAGE_WINDOW 5
@@ -22,6 +23,7 @@ typedef struct {
     int count;
     float last_sent;
     float threshold;
+    bool should_send;
 } moving_average_t;
 
 /**

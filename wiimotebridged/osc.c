@@ -106,6 +106,7 @@ void moving_average_init(moving_average_t* filter, float threshold) {
     filter->count = 0;
     filter->last_sent = 0;
     filter->threshold = threshold;
+    filter->should_send = false;
 }
 
 float moving_average_update(moving_average_t* filter, float value) {
@@ -128,10 +129,10 @@ float moving_average_update(moving_average_t* filter, float value) {
     float avg = filter->sum / filter->count;
     
     // Check if change is significant
-    if (fabs(avg - filter->last_sent) > filter->threshold) {
+    filter->should_send = (fabs(avg - filter->last_sent) > filter->threshold);
+    if (filter->should_send) {
         filter->last_sent = avg;
-        return avg;
     }
     
-    return 0;
+    return avg;
 } 

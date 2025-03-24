@@ -233,8 +233,10 @@ void handle_event(struct wiimote_t* wm) {
 		float pitch = moving_average_update(&filters[wm->unid].pitch, wm->orient.pitch);
 		float yaw = moving_average_update(&filters[wm->unid].yaw, wm->orient.yaw);
 		
-		// Only send if there was significant change
-		if (roll != 0 || pitch != 0 || yaw != 0) {
+		// Only send if there was significant change in any axis
+		if (filters[wm->unid].roll.should_send || 
+			filters[wm->unid].pitch.should_send || 
+			filters[wm->unid].yaw.should_send) {
 			char addr[64];
 			snprintf(addr, sizeof(addr), "/wii/%d/orientation", wm->unid);
 			osc_send_message(&osc_client, addr, ",fff", roll, pitch, yaw);
