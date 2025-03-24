@@ -31,39 +31,6 @@ jobs:
           cmake -B build-static
           cmake --build build-static
 
-  build-macos:
-    runs-on: macos-latest
-    steps:
-      - name: Check out repository code
-        uses: actions/checkout@v2
-      - name: Install dependencies
-        run: |
-          brew update
-          brew install cmake freeglut sdl
-      - name: Build (shared lib)
-        run: | 
-          cmake -B build-shared -DBUILD_SHARED_LIBS=TRUE
-          cmake --build build-shared
-      - name: Build (static lib)
-        run: |
-          cmake -B build-static
-          cmake --build build-static
-
-  build-windows-msvc:
-    runs-on: windows-latest
-    steps:
-      - name: Check out repository code
-        uses: actions/checkout@v2
-      - name: Build (shared lib)
-        run: |
-          cmake -B build-shared -DBUILD_SHARED_LIBS=TRUE
-          cmake --build build-shared
-      - name: Build (static lib)
-        run: |
-          cmake -B build-static
-          cmake --build build-static
-
-  build-windows-mingw:
     runs-on: windows-latest
     strategy:
       matrix:
