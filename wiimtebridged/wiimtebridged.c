@@ -42,8 +42,24 @@
 #include <unistd.h>                     /* for usleep */
 #endif
 
+#include "osc.h"
+
 #define MAX_WIIMOTES				4
 
+// Add global OSC client
+osc_client_t osc_client;
+
+// Add moving average filters for each axis per wiimote
+struct wiimote_filters {
+	moving_average_t roll;
+	moving_average_t pitch;
+	moving_average_t yaw;
+	moving_average_t accel_x;
+	moving_average_t accel_y;
+	moving_average_t accel_z;
+};
+
+struct wiimote_filters filters[MAX_WIIMOTES];
 
 /**
  *	@brief Callback that handles an event.
@@ -59,36 +75,123 @@ void handle_event(struct wiimote_t* wm) {
 	/* if a button is pressed, report it */
 	if (IS_PRESSED(wm, WIIMOTE_BUTTON_A)) {
 		printf("A pressed\n");
+		char addr[64];
+		snprintf(addr, sizeof(addr), "/wii/%d/buttons/a", wm->unid);
+		osc_send_message(&osc_client, addr, ",i", 1);
+	} else if (wm->btns_released & WIIMOTE_BUTTON_A) {
+		char addr[64];
+		snprintf(addr, sizeof(addr), "/wii/%d/buttons/a", wm->unid);
+		osc_send_message(&osc_client, addr, ",i", 0);
 	}
+	
 	if (IS_PRESSED(wm, WIIMOTE_BUTTON_B)) {
 		printf("B pressed\n");
+		char addr[64];
+		snprintf(addr, sizeof(addr), "/wii/%d/buttons/b", wm->unid);
+		osc_send_message(&osc_client, addr, ",i", 1);
+	} else if (wm->btns_released & WIIMOTE_BUTTON_B) {
+		char addr[64];
+		snprintf(addr, sizeof(addr), "/wii/%d/buttons/b", wm->unid);
+		osc_send_message(&osc_client, addr, ",i", 0);
 	}
+
 	if (IS_PRESSED(wm, WIIMOTE_BUTTON_UP)) {
 		printf("UP pressed\n");
+		char addr[64];
+		snprintf(addr, sizeof(addr), "/wii/%d/buttons/up", wm->unid);
+		osc_send_message(&osc_client, addr, ",i", 1);
+	} else if (wm->btns_released & WIIMOTE_BUTTON_UP) {
+		char addr[64];
+		snprintf(addr, sizeof(addr), "/wii/%d/buttons/up", wm->unid);
+		osc_send_message(&osc_client, addr, ",i", 0);
 	}
-	if (IS_PRESSED(wm, WIIMOTE_BUTTON_DOWN))	{
+
+	if (IS_PRESSED(wm, WIIMOTE_BUTTON_DOWN)) {
 		printf("DOWN pressed\n");
+		char addr[64];
+		snprintf(addr, sizeof(addr), "/wii/%d/buttons/down", wm->unid);
+		osc_send_message(&osc_client, addr, ",i", 1);
+	} else if (wm->btns_released & WIIMOTE_BUTTON_DOWN) {
+		char addr[64];
+		snprintf(addr, sizeof(addr), "/wii/%d/buttons/down", wm->unid);
+		osc_send_message(&osc_client, addr, ",i", 0);
 	}
-	if (IS_PRESSED(wm, WIIMOTE_BUTTON_LEFT))	{
+
+	if (IS_PRESSED(wm, WIIMOTE_BUTTON_LEFT)) {
 		printf("LEFT pressed\n");
+		char addr[64];
+		snprintf(addr, sizeof(addr), "/wii/%d/buttons/left", wm->unid);
+		osc_send_message(&osc_client, addr, ",i", 1);
+	} else if (wm->btns_released & WIIMOTE_BUTTON_LEFT) {
+		char addr[64];
+		snprintf(addr, sizeof(addr), "/wii/%d/buttons/left", wm->unid);
+		osc_send_message(&osc_client, addr, ",i", 0);
 	}
-	if (IS_PRESSED(wm, WIIMOTE_BUTTON_RIGHT))	{
+
+	if (IS_PRESSED(wm, WIIMOTE_BUTTON_RIGHT)) {
 		printf("RIGHT pressed\n");
+		char addr[64];
+		snprintf(addr, sizeof(addr), "/wii/%d/buttons/right", wm->unid);
+		osc_send_message(&osc_client, addr, ",i", 1);
+	} else if (wm->btns_released & WIIMOTE_BUTTON_RIGHT) {
+		char addr[64];
+		snprintf(addr, sizeof(addr), "/wii/%d/buttons/right", wm->unid);
+		osc_send_message(&osc_client, addr, ",i", 0);
 	}
-	if (IS_PRESSED(wm, WIIMOTE_BUTTON_MINUS))	{
+
+	if (IS_PRESSED(wm, WIIMOTE_BUTTON_MINUS)) {
 		printf("MINUS pressed\n");
+		char addr[64];
+		snprintf(addr, sizeof(addr), "/wii/%d/buttons/minus", wm->unid);
+		osc_send_message(&osc_client, addr, ",i", 1);
+	} else if (wm->btns_released & WIIMOTE_BUTTON_MINUS) {
+		char addr[64];
+		snprintf(addr, sizeof(addr), "/wii/%d/buttons/minus", wm->unid);
+		osc_send_message(&osc_client, addr, ",i", 0);
 	}
-	if (IS_PRESSED(wm, WIIMOTE_BUTTON_PLUS))	{
+
+	if (IS_PRESSED(wm, WIIMOTE_BUTTON_PLUS)) {
 		printf("PLUS pressed\n");
+		char addr[64];
+		snprintf(addr, sizeof(addr), "/wii/%d/buttons/plus", wm->unid);
+		osc_send_message(&osc_client, addr, ",i", 1);
+	} else if (wm->btns_released & WIIMOTE_BUTTON_PLUS) {
+		char addr[64];
+		snprintf(addr, sizeof(addr), "/wii/%d/buttons/plus", wm->unid);
+		osc_send_message(&osc_client, addr, ",i", 0);
 	}
+
 	if (IS_PRESSED(wm, WIIMOTE_BUTTON_ONE)) {
 		printf("ONE pressed\n");
+		char addr[64];
+		snprintf(addr, sizeof(addr), "/wii/%d/buttons/one", wm->unid);
+		osc_send_message(&osc_client, addr, ",i", 1);
+	} else if (wm->btns_released & WIIMOTE_BUTTON_ONE) {
+		char addr[64];
+		snprintf(addr, sizeof(addr), "/wii/%d/buttons/one", wm->unid);
+		osc_send_message(&osc_client, addr, ",i", 0);
 	}
+
 	if (IS_PRESSED(wm, WIIMOTE_BUTTON_TWO)) {
 		printf("TWO pressed\n");
+		char addr[64];
+		snprintf(addr, sizeof(addr), "/wii/%d/buttons/two", wm->unid);
+		osc_send_message(&osc_client, addr, ",i", 1);
+	} else if (wm->btns_released & WIIMOTE_BUTTON_TWO) {
+		char addr[64];
+		snprintf(addr, sizeof(addr), "/wii/%d/buttons/two", wm->unid);
+		osc_send_message(&osc_client, addr, ",i", 0);
 	}
-	if (IS_PRESSED(wm, WIIMOTE_BUTTON_HOME))	{
+
+	if (IS_PRESSED(wm, WIIMOTE_BUTTON_HOME)) {
 		printf("HOME pressed\n");
+		char addr[64];
+		snprintf(addr, sizeof(addr), "/wii/%d/buttons/home", wm->unid);
+		osc_send_message(&osc_client, addr, ",i", 1);
+	} else if (wm->btns_released & WIIMOTE_BUTTON_HOME) {
+		char addr[64];
+		snprintf(addr, sizeof(addr), "/wii/%d/buttons/home", wm->unid);
+		osc_send_message(&osc_client, addr, ",i", 0);
 	}
 
 	/*
@@ -139,9 +242,32 @@ void handle_event(struct wiimote_t* wm) {
 
 	/* if the accelerometer is turned on then print angles */
 	if (WIIUSE_USING_ACC(wm)) {
-		printf("wiimote roll  = %f [%f]\n", wm->orient.roll, wm->orient.a_roll);
-		printf("wiimote pitch = %f [%f]\n", wm->orient.pitch, wm->orient.a_pitch);
-		printf("wiimote yaw   = %f\n", wm->orient.yaw);
+		// Get filtered values
+		float roll = moving_average_update(&filters[wm->unid].roll, wm->orient.roll);
+		float pitch = moving_average_update(&filters[wm->unid].pitch, wm->orient.pitch);
+		float yaw = moving_average_update(&filters[wm->unid].yaw, wm->orient.yaw);
+		
+		// Only send if there was significant change
+		if (roll != 0 || pitch != 0 || yaw != 0) {
+			char addr[64];
+			snprintf(addr, sizeof(addr), "/wii/%d/orientation", wm->unid);
+			osc_send_message(&osc_client, addr, ",fff", roll, pitch, yaw);
+			
+			printf("wiimote roll  = %f [%f]\n", roll, wm->orient.a_roll);
+			printf("wiimote pitch = %f [%f]\n", pitch, wm->orient.a_pitch);
+			printf("wiimote yaw   = %f\n", yaw);
+		}
+
+		// Handle raw acceleration data
+		float accel_x = moving_average_update(&filters[wm->unid].accel_x, wm->accel.x);
+		float accel_y = moving_average_update(&filters[wm->unid].accel_y, wm->accel.y);
+		float accel_z = moving_average_update(&filters[wm->unid].accel_z, wm->accel.z);
+
+		if (accel_x != 0 || accel_y != 0 || accel_z != 0) {
+			char addr[64];
+			snprintf(addr, sizeof(addr), "/wii/%d/accel", wm->unid);
+			osc_send_message(&osc_client, addr, ",fff", accel_x, accel_y, accel_z);
+		}
 	}
 
 	/*
@@ -172,10 +298,30 @@ void handle_event(struct wiimote_t* wm) {
 
 		if (IS_PRESSED(nc, NUNCHUK_BUTTON_C)) {
 			printf("Nunchuk: C pressed\n");
+			char addr[64];
+			snprintf(addr, sizeof(addr), "/wii/%d/nunchuk/buttons/c", wm->unid);
+			osc_send_message(&osc_client, addr, ",i", 1);
+		} else if (nc->btns_released & NUNCHUK_BUTTON_C) {
+			char addr[64];
+			snprintf(addr, sizeof(addr), "/wii/%d/nunchuk/buttons/c", wm->unid);
+			osc_send_message(&osc_client, addr, ",i", 0);
 		}
+
 		if (IS_PRESSED(nc, NUNCHUK_BUTTON_Z)) {
 			printf("Nunchuk: Z pressed\n");
+			char addr[64];
+			snprintf(addr, sizeof(addr), "/wii/%d/nunchuk/buttons/z", wm->unid);
+			osc_send_message(&osc_client, addr, ",i", 1);
+		} else if (nc->btns_released & NUNCHUK_BUTTON_Z) {
+			char addr[64];
+			snprintf(addr, sizeof(addr), "/wii/%d/nunchuk/buttons/z", wm->unid);
+			osc_send_message(&osc_client, addr, ",i", 0);
 		}
+
+		// Send joystick data
+		char addr[64];
+		snprintf(addr, sizeof(addr), "/wii/%d/nunchuk/joystick", wm->unid);
+		osc_send_message(&osc_client, addr, ",ff", nc->js.x, nc->js.y);
 
 		printf("nunchuk roll  = %f\n", nc->orient.roll);
 		printf("nunchuk pitch = %f\n", nc->orient.pitch);
@@ -406,6 +552,31 @@ short any_wiimote_connected(wiimote** wm, int wiimotes) {
 int main(int argc, char** argv) {
 	wiimote** wiimotes;
 	int found, connected;
+
+	// Parse command line arguments for OSC server IP and port
+	if (argc != 3) {
+		printf("Usage: %s <osc_server_ip> <osc_port>\n", argv[0]);
+		return 1;
+	}
+
+	const char* osc_ip = argv[1];
+	int osc_port = atoi(argv[2]);
+
+	// Initialize OSC client
+	if (osc_init(&osc_client, osc_ip, osc_port) < 0) {
+		printf("Failed to initialize OSC client\n");
+		return 1;
+	}
+
+	// Initialize moving average filters for each wiimote
+	for (int i = 0; i < MAX_WIIMOTES; i++) {
+		moving_average_init(&filters[i].roll, 0.5f);
+		moving_average_init(&filters[i].pitch, 0.5f);
+		moving_average_init(&filters[i].yaw, 0.5f);
+		moving_average_init(&filters[i].accel_x, 0.1f);
+		moving_average_init(&filters[i].accel_y, 0.1f);
+		moving_average_init(&filters[i].accel_z, 0.1f);
+	}
 
 	/*
 	 *	Initialize an array of wiimote objects.

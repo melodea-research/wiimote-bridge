@@ -2,12 +2,25 @@
 # http://academic.cleardefinition.com/
 # Iowa State University HCI Graduate Program/VRAC
 
-cmake_minimum_required(VERSION 3.0.0)
+cmake_minimum_required(VERSION 3.0)
 
 # Set package properties
-project(WiiUse
+project(wiiuse
 	VERSION 0.15.5
 	DESCRIPTION "Feature-complete cross-platform Wii Remote access library")
+
+# Version number
+set(PROJECT_VERSION_MAJOR 0)
+set(PROJECT_VERSION_MINOR 15)
+set(PROJECT_VERSION_PATCH 5)
+set(PROJECT_VERSION ${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}.${PROJECT_VERSION_PATCH})
+
+# Options
+option(BUILD_EXAMPLE "Build example" ON)
+option(INSTALL_EXAMPLES "Install examples" ON)
+option(WIIUSE_SYNC_HANDSHAKE "Use synchronous handshaking" OFF)
+
+option(CPACK_MONOLITHIC_INSTALL "Only produce a single component installer, rather than multi-component." NO)
 
 ###
 # Set up options
@@ -17,19 +30,12 @@ if(NOT CMAKE_SOURCE_DIR STREQUAL CMAKE_CURRENT_SOURCE_DIR)
 	set(SUBPROJECT YES)
 endif()
 
-option(BUILD_EXAMPLE "Should we build the example app?" YES)
-option(BUILD_EXAMPLE_SDL "Should we build the SDL-based example app?" YES)
-option(INSTALL_EXAMPLES "Should we install the example apps?" YES)
-
-option(CPACK_MONOLITHIC_INSTALL "Only produce a single component installer, rather than multi-component." NO)
-
 ###
 # Perform build configuration of dependencies
 ###
 
 # Locally-developed modules dist'ed with this app - always have this first.
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
-#include(UseBackportedModules)
 include(DoxygenTargets)
 
 if(NOT BUILD_SHARED_LIBS)
@@ -63,11 +69,7 @@ add_subdirectory(src)
 if(NOT SUBPROJECT)
 	# Example apps
 	if(BUILD_EXAMPLE)
-		add_subdirectory(example)
-	endif()
-
-	if(BUILD_EXAMPLE_SDL)
-		add_subdirectory(example-sdl)
+		add_subdirectory(wiimtebridged)
 	endif()
 endif()
 
@@ -109,10 +111,8 @@ if(NOT SUBPROJECT)
 		DESTINATION ${DOC_DIR} COMPONENT docs)
 
 	if(INSTALL_EXAMPLES)
-		install(FILES example/example.c
-			DESTINATION ${DOC_DIR}/example COMPONENT examples)
-		install(FILES example-sdl/sdl.c
-			DESTINATION ${DOC_DIR}/example-sdl COMPONENT examples)
+		install(FILES wiimtebridged/wiimtebridged.c
+			DESTINATION ${DOC_DIR}/wiimtebridged COMPONENT examples)
 	endif()
 
 	set(CPACK_RESOURCE_FILE_LICENSE "${CMAKE_CURRENT_SOURCE_DIR}/LICENSE")
