@@ -6,14 +6,25 @@
 #include <sys/socket.h>
 #include <string.h>
 #include <stdbool.h>
+#include <time.h>
+#include <avahi-client/client.h>
+#include <avahi-client/lookup.h>
+#include <avahi-common/simple-watch.h>
+#include <avahi-common/malloc.h>
+#include <avahi-common/error.h>
 
 #define OSC_MAX_MESSAGE_SIZE 1024
 #define OSC_MOVING_AVERAGE_WINDOW 5
+#define SERVICE_TYPE "_osc._udp"
+#define TARGET_SERVICE_NAME "AgapeKidAvatarBridge"
 
 typedef struct {
     int sock;
     struct sockaddr_in server_addr;
     char buffer[OSC_MAX_MESSAGE_SIZE];
+    bool discovered;
+    char host[256];
+    int port;
 } osc_client_t;
 
 typedef struct {
@@ -27,14 +38,12 @@ typedef struct {
 } moving_average_t;
 
 /**
- * @brief Initialize OSC client
+ * @brief Initialize OSC client with discovered server info
  * 
  * @param client Pointer to osc_client_t structure
- * @param ip_address IP address of OSC server
- * @param port Port number of OSC server
  * @return int 0 on success, -1 on failure
  */
-int osc_init(osc_client_t* client, const char* ip_address, int port);
+int osc_init(osc_client_t* client);
 
 /**
  * @brief Send OSC message
@@ -63,5 +72,13 @@ void moving_average_init(moving_average_t* filter, float threshold);
  * @return float Current average if change > threshold, or 0 if no significant change
  */
 float moving_average_update(moving_average_t* filter, float value);
+
+/**
+ * @brief Discover OSC server using Zeroconf
+ * 
+ * @param client Pointer to osc_client_t structure
+ * @return int 0 on success, -1 on failure
+ */
+int osc_discover_server(osc_client_t* client);
 
 #endif /* OSC_H_INCLUDED */ 

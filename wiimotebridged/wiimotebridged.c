@@ -20,7 +20,8 @@
  *	@brief Bridge between WiiMote and OSC - works on Raspberry Pi chipset with BlueZ.
  */
 
-#include <stdio.h>                      /* for printf */
+#include <stdio.h>      /* for printf */
+#include <stdlib.h>     /* for atoi */
 
 #include "wiiuse.h"                     /* for wiimote_t, classic_ctrl_t, etc */
 
@@ -541,20 +542,16 @@ int main(int argc, char** argv) {
 	wiimote** wiimotes;
 	int found, connected;
 
-	// Parse command line arguments for OSC server IP and port
-	if (argc != 3) {
-		printf("Usage: %s <osc_server_ip> <osc_port>\n", argv[0]);
+	// Initialize OSC client structure
+	memset(&osc_client, 0, sizeof(osc_client));
+
+	// Try to discover OSC server
+	printf("Discovering OSC server...\n");
+	if (osc_discover_server(&osc_client) < 0) {
+		printf("Failed to discover OSC server. Please check if AgapeKidAvatarBridge is running.\n");
 		return 1;
 	}
-
-	const char* osc_ip = argv[1];
-	int osc_port = atoi(argv[2]);
-
-	// Initialize OSC client
-	if (osc_init(&osc_client, osc_ip, osc_port) < 0) {
-		printf("Failed to initialize OSC client\n");
-		return 1;
-	}
+	printf("Successfully connected to OSC server at %s:%d\n", osc_client.host, osc_client.port);
 
 	// Initialize moving average filters for each wiimote
 	for (int i = 0; i < MAX_WIIMOTES; i++) {
