@@ -201,11 +201,6 @@ void handle_event(struct wiimote_t* wm) {
 		wiiuse_motion_sensing(wm, 1);
 	}
 
-	/* Toggle rumble on B just press */
-	if (IS_JUST_PRESSED(wm, WIIMOTE_BUTTON_B)) {
-		wiiuse_toggle_rumble(wm);
-	}
-
 	/* IR camera control with up/down */
 	if (IS_JUST_PRESSED(wm, WIIMOTE_BUTTON_UP)) {
 		wiiuse_set_ir(wm, 1);
@@ -295,6 +290,28 @@ void handle_event(struct wiimote_t* wm) {
 		char addr[64];
 		snprintf(addr, sizeof(addr), "/wii/%d/nunchuk/joystick", wiimote_id);
 		osc_send_message(&osc_client, addr, ",ff", nc->js.x, nc->js.y);
+	}
+
+	// Add short burst of vibration on B press
+	if (IS_JUST_PRESSED(wm, WIIMOTE_BUTTON_B)) {
+		wiiuse_rumble(wm, 1);
+#ifndef WIIUSE_WIN32
+		usleep(100000); // 100ms
+#else
+		Sleep(100);
+#endif
+		wiiuse_rumble(wm, 0);
+	}
+
+	// Add short burst of vibration on B release
+	if (wm->btns_released & WIIMOTE_BUTTON_B) {
+		wiiuse_rumble(wm, 1);
+#ifndef WIIUSE_WIN32
+		usleep(100000); // 100ms
+#else
+		Sleep(100);
+#endif
+		wiiuse_rumble(wm, 0);
 	}
 }
 
