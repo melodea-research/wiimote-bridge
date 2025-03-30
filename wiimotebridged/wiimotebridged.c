@@ -38,7 +38,7 @@
 
 // Global variables
 osc_client_t osc_client;
-int wiimote_id = 1;  // Default ID if not specified
+static int wiimote_id = -1;  // Initialize to invalid value
 bool b_button_pressed = false; // Track B button state
 
 // Add moving average filters for each axis
@@ -60,7 +60,7 @@ struct {
  *	event occurs on the specified wiimote.
  */
 void handle_event(struct wiimote_t* wm) {
-	printf("\n\n--- EVENT [id %i] ---\n", wiimote_id);
+	// printf("\n\n--- EVENT [id %i] ---\n", wiimote_id);
 
 	/* Track B button state for acceleration data */
 	if (IS_JUST_PRESSED(wm, WIIMOTE_BUTTON_B)) {
@@ -413,20 +413,20 @@ short any_wiimote_connected(wiimote** wm, int wiimotes) {
  *	that occur on either device.
  */
 int main(int argc, char** argv) {
-	// MUST be the very first thing we do
+	// Validate command line args first
 	if (argc != 2) {
 		fprintf(stderr, "Error: Wiimote ID argument is required\n\n");
 		fprintf(stderr, "Usage: %s <wiimote_id>\n", argv[0]);
 		fprintf(stderr, "  wiimote_id must be between 1 and 4\n");
-		return 1;  // Exit immediately
+		return 1;
 	}
 
-	// Convert and validate the Wiimote ID
+	// Parse and validate Wiimote ID
 	char* endptr;
-	int wiimote_id = strtol(argv[1], &endptr, 10);
+	wiimote_id = strtol(argv[1], &endptr, 10);
 	if (*endptr != '\0' || wiimote_id < 1 || wiimote_id > 4) {
 		fprintf(stderr, "Error: Invalid Wiimote ID '%s'. Must be a number between 1 and 4.\n", argv[1]);
-		return 1;  // Exit immediately
+		return 1;
 	}
 
 	// Only continue if we have a valid ID
